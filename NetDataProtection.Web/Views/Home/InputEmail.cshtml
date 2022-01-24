@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Input Email";
+}
+<h1>@ViewData["Title"]</h1>
+
+@if (ViewBag.ValidationLink!=null)
+{
+    <p>
+        Doğrulama Linkiniz: <a href="@ViewBag.ValidationLink">@ViewBag.ValidationLink</a>
+    </p>
+
+}
+
+<form method="post">
+    <label class="col-form-label">Email Adresiniz</label>
+    <input type="text" name="email" class="form-control"/>
+    <button>Gönder</button>
+</form>
