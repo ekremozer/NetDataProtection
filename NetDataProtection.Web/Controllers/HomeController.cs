@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.DataProtection;
 using NetDataProtection.Web.Core;
@@ -40,7 +41,7 @@ namespace NetDataProtection.Web.Controllers
         public IActionResult InputEmail(string email)
         {
             var timeLimited = _dataProtector.ToTimeLimitedDataProtector();
-            var encryptedEmail = timeLimited.Protect(email, TimeSpan.FromSeconds(5));
+            var encryptedEmail = timeLimited.Protect(email, TimeSpan.FromHours(24));
             //var encryptedEmail = _dataProtector.Protect(email);
             var validationLink = $"/home/EmailValidation?email={encryptedEmail}";
             ViewBag.ValidationLink = validationLink;
@@ -49,11 +50,18 @@ namespace NetDataProtection.Web.Controllers
 
         public IActionResult EmailValidation(string email)
         {
-            var decryptedEmail = _dataProtector.Unprotect(email);
-            var isValid = _emailList.Contains(decryptedEmail);
-            ViewBag.Message = isValid
-                ? $"{decryptedEmail} email adresiniz doğrulandı."
-                : $"{decryptedEmail} email adresiniz doğrulanamadı.";
+            try
+            {
+                var decryptedEmail = _dataProtector.Unprotect(email);
+                var isValid = _emailList.Contains(decryptedEmail);
+                ViewBag.Message = isValid
+                    ? $"{decryptedEmail} email adresiniz doğrulandı."
+                    : $"{decryptedEmail} email adresiniz doğrulanamadı.";
+            }
+            catch (CryptographicException ex)
+            {
+                ViewBag.Message = $"Hata oluştu: {ex.Message}";
+            }
             return View();
         }
 
